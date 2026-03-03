@@ -1,0 +1,37 @@
+services:
+  # Pipeline 1: B3 Índices Segmentos Setoriais
+  b3-indices-pipeline:
+    build:
+      context: ..
+      dockerfile: Pipelines/Dockerfile
+    container_name: b3-indices-pipeline
+    environment:
+      - PYTHONUNBUFFERED=1
+      - PIPELINE_NAME=b3_indices_segmentos_setoriais
+      - PIPELINE_ENV=prod
+    volumes:
+      - ./data:/app/Pipelines/data
+      - ./logs:/app/Pipelines/logs
+      - ./state:/app/Pipelines/state
+    restart: on-failure
+    tmpfs:
+      - /tmp
+
+  # Pipeline 2: Outro pipeline (exemplo)
+  # outro-pipeline:
+  #   build:
+  #     context: ..
+  #     dockerfile: Pipelines/Dockerfile
+  #   container_name: outro-pipeline
+  #   environment:
+  #     - PYTHONUNBUFFERED=1
+  #     - PIPELINE_NAME=outro_pipeline
+  #     - PIPELINE_ENV=prod
+  #   volumes:
+  #     - ./data:/app/Pipelines/data
+  #     - ./logs:/app/Pipelines/logs
+  #     - ./state:/app/Pipelines/state
+  #   restart: on-failure
+  #   tmpfs:
+  #     - /tmp
+
