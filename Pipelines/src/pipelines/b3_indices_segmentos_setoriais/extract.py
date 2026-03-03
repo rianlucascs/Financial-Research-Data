@@ -156,6 +156,10 @@ class ExtractB3IndicesSegmentosSetoriais:
             with open(checkpoint_file, "r", encoding="utf-8") as fp:
                 checkpoint = json.load(fp)
 
+            # verificar se o checkpoint corresponde ao índice (pode ser que exista um checkpoint para outro índice, mas não para este)
+            if not checkpoint.get('indice').lower() in checkpoint.get('downloaded_file').lower():
+                return True, "arquivo_nao_encontrado"
+
             path_file = ctx.path_raw(self.pipeline) / checkpoint.get('downloaded_file')
             
             # se arquivo não existe, precisa fazer download (pode ter sido deletado manualmente ou por limpeza automática)

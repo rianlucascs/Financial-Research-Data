@@ -39,8 +39,15 @@ class PipelineContext:
         raw_path = self.path_raw(pipeline, type_file)
         raw_path.mkdir(parents=True, exist_ok=True)
         return raw_path
+    
+    def prepare_interim_path(self, pipeline: str) -> tuple[Path, Path]:
+        """Retorna o caminho interim e garante que ele exista."""
+        raw_path = self.path_raw(pipeline)
+        interim_path = self.path_interim(pipeline)
+        interim_path.mkdir(parents=True, exist_ok=True)
+        return raw_path, interim_path
 
-    def prepare_transform_paths(self, pipeline: str, process: str) -> tuple[Path, Path]:
+    def prepare_processed_paths(self, pipeline: str, process: str) -> tuple[Path, Path]:
         """Retorna caminhos raw/processed para um transform e garante que processed exista."""
         raw_path = self.path_raw(pipeline)
         processed_path = self.path_processed(pipeline, process)

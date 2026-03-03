@@ -9,7 +9,7 @@ SCHEMA_VERSION = "v2"
 
 # Stages padrão
 STAGE_EXTRACT = "extract"
-STAGE_TRANSFORM = "transform"
+STAGE_PROCESSED = "processed"
 STAGE_LOAD = "load"
 STAGE_QUALITY = "quality"
 STAGE_PUBLISH = "publish"
@@ -33,7 +33,7 @@ FAILURE_FILE_DETECTION = "file_detection"
 FAILURE_VALIDATION = "validation"
 FAILURE_EXCEPTION = "exception"
 FAILURE_DOWNLOAD_BUTTON_NOT_FOUND = "download_button_not_found"
-FAILURE_TRANSFORM_EXCEPTION = "transform_exception"
+FAILURE_PROCESSED_EXCEPTION = "transform_exception"
 
 # Failure points técnicos adicionais (padrão de mercado)
 FAILURE_NETWORK_ERROR = "network_error"

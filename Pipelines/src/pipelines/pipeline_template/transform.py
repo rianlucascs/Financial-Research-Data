@@ -5,8 +5,8 @@ from src.shared.checkpoint_values import STATUS_SUCCESSFUL, STATUS_FAILED
 from .config import (
     PIPELINE_NAME,
     DOMINIO_ITENS,
-    CHECKPOINT_STAGE_TRANSFORM,
-    CHECKPOINT_STEP_TRANSFORM_1,
+    CHECKPOINT_STAGE_PROCESSED,
+    CHECKPOINT_STEP_PROCESSED_1,
 )
 
 
@@ -18,22 +18,22 @@ class TransformPipelineTemplate:
     def _gravar_checkpoint(self, item: str, status: str, failure_point: str | None, ctx: PipelineContext):
         payload = build_checkpoint_payload(
             pipeline=self.pipeline,
-            stage=CHECKPOINT_STAGE_TRANSFORM,
-            step=CHECKPOINT_STEP_TRANSFORM_1,
+            stage=CHECKPOINT_STAGE_PROCESSED,
+            step=CHECKPOINT_STEP_PROCESSED_1,
             status=status,
             run_id=ctx.run_id,
             environment=ctx.env,
             failure_point=failure_point,
             extra={"item": item},
         )
-        ctx.write_checkpoint(self.pipeline, CHECKPOINT_STAGE_TRANSFORM, CHECKPOINT_STEP_TRANSFORM_1, item, payload)
+        ctx.write_checkpoint(self.pipeline, CHECKPOINT_STAGE_PROCESSED, CHECKPOINT_STEP_PROCESSED_1, item, payload)
 
     def transform_1(self, ctx=None):
         if ctx is None:
             ctx = PipelineContext()
 
         self.logger = getattr(ctx, "logger", self.logger)
-        _, processed_path = ctx.prepare_transform_paths(self.pipeline, CHECKPOINT_STEP_TRANSFORM_1)
+        _, processed_path = ctx.prepare_processed_paths(self.pipeline, CHECKPOINT_STEP_PROCESSED_1)
 
         for item in DOMINIO_ITENS:
             try:

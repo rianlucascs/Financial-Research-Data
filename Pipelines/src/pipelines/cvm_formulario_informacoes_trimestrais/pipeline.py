@@ -1,6 +1,7 @@
 
 from src.shared.context import PipelineContext
 from .extract import ExtractCVMFormularioInformacoesTrimestrais
+from .transform import TransformCVMFormularioInformacoesTrimestrais
 
 
 class PipelineCVMFormularioInformacoesTrimestrais:
@@ -23,6 +24,9 @@ class PipelineCVMFormularioInformacoesTrimestrais:
         # Mantemos compatibilidade chamando as classes existentes.
         extract = ExtractCVMFormularioInformacoesTrimestrais(pipeline=self.pipeline)
         extract.main(ctx=self.ctx)
+
+        transform = TransformCVMFormularioInformacoesTrimestrais(pipeline=self.pipeline)
+        transform.main(ctx=self.ctx)
 
 
 def main(env: str = "dev", run_id: str | None = None):

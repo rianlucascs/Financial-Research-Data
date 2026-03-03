@@ -9,12 +9,12 @@ from src.shared.checkpoint_contract import build_checkpoint_payload
 from src.shared.checkpoint_values import (
     STATUS_SUCCESSFUL,
     STATUS_FAILED,
-    FAILURE_TRANSFORM_EXCEPTION,
+    FAILURE_PROCESSED_EXCEPTION,
 )
 from .config import (
     B3_INDICES,
-    CHECKPOINT_STAGE_TRANSFORM,
-    CHECKPOINT_STEP_TRANSFORM_1,
+    CHECKPOINT_STAGE_PROCESSED,
+    CHECKPOINT_STEP_PROCESSED_1,
 )
 
 class TransformB3IndicesSegmentosSetoriais:
@@ -41,7 +41,7 @@ class TransformB3IndicesSegmentosSetoriais:
                               status, failure_point=None, processed_rows=None, extra=None):
         checkpoint = build_checkpoint_payload(
             pipeline=self.pipeline,
-            stage=CHECKPOINT_STAGE_TRANSFORM,
+            stage=CHECKPOINT_STAGE_PROCESSED,
             step=step,
             status=status,
             run_id=getattr(ctx, "run_id", None),
@@ -95,13 +95,14 @@ class TransformB3IndicesSegmentosSetoriais:
             return False
 
     def transform_1(self, ctx=None):
+        
 
-        step = CHECKPOINT_STEP_TRANSFORM_1
+        step = CHECKPOINT_STEP_PROCESSED_1
 
         if ctx is None:
             ctx = PipelineContext()
 
-        raw_path, processed_path = ctx.prepare_transform_paths(self.pipeline, step)
+        raw_path, processed_path = ctx.prepare_processed_paths(self.pipeline, step)
 
         raw_files = listdir(raw_path)
         self.logger.info(f"Encontrados {len(raw_files)} arquivos em {raw_path}")
@@ -121,7 +122,7 @@ class TransformB3IndicesSegmentosSetoriais:
 
             input_path = Path(raw_path) / filename
             output_path = Path(processed_path) / f'{indice}.csv'
-            ck_file = ctx.checkpoint_file(self.pipeline, CHECKPOINT_STAGE_TRANSFORM, step, filename)
+            ck_file = ctx.checkpoint_file(self.pipeline, CHECKPOINT_STAGE_PROCESSED, step, filename)
 
             # verificar checkpoint para esse arquivo
             try:
@@ -154,7 +155,7 @@ class TransformB3IndicesSegmentosSetoriais:
                 try:
                     ctx.write_checkpoint(
                         self.pipeline,
-                        CHECKPOINT_STAGE_TRANSFORM,
+                        CHECKPOINT_STAGE_PROCESSED,
                         step,
                         filename,
                         self._checkpoint_transform(
@@ -179,7 +180,7 @@ class TransformB3IndicesSegmentosSetoriais:
                 try:
                     ctx.write_checkpoint(
                         self.pipeline,
-                        CHECKPOINT_STAGE_TRANSFORM,
+                        CHECKPOINT_STAGE_PROCESSED,
                         step,
                         filename,
                         self._checkpoint_transform(
@@ -190,7 +191,7 @@ class TransformB3IndicesSegmentosSetoriais:
                             input_path=input_path,
                             output_path=output_path,
                             status=STATUS_FAILED,
-                            failure_point=FAILURE_TRANSFORM_EXCEPTION,
+                            failure_point=FAILURE_PROCESSED_EXCEPTION,
                             processed_rows=None,
                         ),
                     )
