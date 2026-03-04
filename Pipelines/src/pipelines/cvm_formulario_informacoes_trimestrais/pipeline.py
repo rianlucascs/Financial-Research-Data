@@ -22,8 +22,10 @@ class PipelineCVMFormularioInformacoesTrimestrais:
     def run(self):
         # atualmente os steps existentes usam apenas o nome do pipeline.
         # Mantemos compatibilidade chamando as classes existentes.
-        extract = ExtractCVMFormularioInformacoesTrimestrais(pipeline=self.pipeline)
-        extract.main(ctx=self.ctx)
+
+        # extract = ExtractCVMFormularioInformacoesTrimestrais(pipeline=self.pipeline)
+        # extract.main(ctx=self.ctx) 
+        # # ---!
 
         transform = TransformCVMFormularioInformacoesTrimestrais(pipeline=self.pipeline)
         transform.main(ctx=self.ctx)
