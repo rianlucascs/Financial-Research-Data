@@ -4,6 +4,7 @@ import uuid
 import logging
 from json import dump
 from logging.handlers import RotatingFileHandler
+from typing import Union
 
 
 @dataclass
@@ -71,6 +72,32 @@ class PipelineContext:
         with open(tmp_file, "w", encoding="utf-8") as fp:
             dump(data, fp, ensure_ascii=False, indent=4)
         tmp_file.replace(ck_file)
+
+    def delete_file(self, file_path: Union[str, Path], missing_ok: bool = True) -> bool:
+        """Apaga um arquivo pelo caminho e retorna se houve remoção.
+
+        Args:
+            file_path: Caminho absoluto ou relativo do arquivo.
+            missing_ok: Se True, não lança erro quando o arquivo não existe.
+
+        Returns:
+            True se o arquivo foi removido, False se não existia e missing_ok=True.
+        """
+        path = Path(file_path)
+
+        if not path.is_absolute():
+            path = self.repo_root / path
+
+        if not path.exists():
+            if missing_ok:
+                return False
+            raise FileNotFoundError(f"Arquivo não encontrado: {path}")
+
+        if not path.is_file():
+            raise IsADirectoryError(f"O caminho informado não é arquivo: {path}")
+
+        path.unlink()
+        return True
 
     def log_path(self, pipeline: str) -> Path:
         """Retorna (e cria) o caminho dos logs do pipeline para este run_id."""

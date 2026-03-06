@@ -27,6 +27,12 @@ from .config import (
 )
 
 class ExtractB3IndicesSegmentosSetoriais:
+    """Download e validação de índices segmentais da B3.
+    
+    Automatiza o acesso ao site da B3 via Selenium, realiza downloads de
+    arquivos CSV dos índices segmentados por setor, valida conteúdo e
+    gerencia tentativas com checkpoint de progresso para recuperação de falhas.
+    """
 
     def __init__(self, pipeline):
         self.pipeline = pipeline

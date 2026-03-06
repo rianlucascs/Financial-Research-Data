@@ -1,4 +1,3 @@
-
 import logging
 import json
 from src.shared.context import PipelineContext
@@ -12,7 +11,6 @@ from src.shared.checkpoint_values import (
 )
 import wget
 from zipfile import ZipFile
-
 from .config import (
     CHECKPOINT_STAGE_EXTRACT,
     CHECKPOINT_STEP_DOWNLOAD_ZIP,
@@ -22,7 +20,14 @@ from .config import (
     ARCHIVES_ZIP
 )
 
+
 class ExtractCVMFormularioInformacoesTrimestrais:
+    """Download e extração de formulários de informações trimestrais da CVM.
+    
+    Realiza o download de arquivos ZIP contendo demonstrações financeiras
+    trimestrais (ITRS) do site da CVM, extrai os arquivos CSV e organiza
+    em estrutura de diretórios intermdiários com gerenciamento de checkpoints.
+    """
 
     def __init__(self, pipeline):
         self.pipeline = pipeline

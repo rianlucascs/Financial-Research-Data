@@ -4,6 +4,14 @@ from .transform import TransformB3IndicesSegmentosSetoriais
 from src.shared.context import PipelineContext
 
 class PipelineB3IndicesSegmentosSetoriais:
+    """Pipeline completa para índices segmentais da B3.
+    
+    Orquestra o fluxo completo de extração e processamento:
+    1. Extract: Download via Selenium dos arquivos CSV do site da B3
+    2. Transform: Limpeza e padronização dos dados em formato processado
+    
+    Gerencia contexto, logging e persistência de checkpoints ao longo do fluxo.
+    """
 
     def __init__(self, env: str = "dev", run_id: str | None = None):
 
@@ -19,8 +27,7 @@ class PipelineB3IndicesSegmentosSetoriais:
             pass
 
     def run(self):
-        # atualmente os steps existentes usam apenas o nome do pipeline.
-        # Mantemos compatibilidade chamando as classes existentes.
+
         extract = ExtractB3IndicesSegmentosSetoriais(pipeline=self.pipeline)
         extract.main(ctx=self.ctx)
 

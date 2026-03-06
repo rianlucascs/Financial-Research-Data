@@ -18,6 +18,12 @@ from .config import (
 )
 
 class TransformB3IndicesSegmentosSetoriais:
+    """Processamento e transformação de índices segmentais da B3.
+    
+    Lê arquivos de índices segmentados por setor da bolsa brasileira (B3),
+    padroniza estrutura de colunas e salva dados transformados em formato
+    CSV. Inclui validação final para garantir cobertura de todos os índices.
+    """
 
     def __init__(self, pipeline):
         self.pipeline = pipeline
