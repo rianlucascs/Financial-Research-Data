@@ -12,12 +12,25 @@ Repositório com dois projetos complementares para coleta, processamento e anál
 ### 1) Pipelines
 Automação de extração e transformação de dados (ETL), com execução local e via Docker.
 
-- Coleta dados de fontes externas (ex.: B3)
-- Aplica transformações e padronização
-- Gera checkpoints para controle de execução
-- Mantém logs por execução
+**Pipelines Implementadas:**
 
-Pasta: [Pipelines](Pipelines)
+- **B3 Índices Segmentais** (`b3_indices_segmentos_setoriais`)
+  - Extrai índices segmentados por setor via Selenium
+  - Processa e padroniza estrutura de dados
+  - Salva em CSV com validação de conteúdo
+
+- **CVM Formulários Trimestrais** (`cvm_formulario_informacoes_trimestrais`)
+  - Download de demonstrações financeiras trimestrais (ITRS) em ZIP
+  - Consolidação de arquivos anuais (2011 em diante)
+  - Filtragem por ticker e separação em arquivos por empresa
+
+**Características:**
+- Checkpoint de progresso: recovery automático em caso de falha
+- Logs estruturados por data/run_id
+- Suporte a modo desenvolvimento (skip de reprocessamento)
+- Validação de dados em cada etapa
+
+Pasta: [Pipelines](Pipelines) | Detalhes: [Pipelines/ARQUITETURA.md](Pipelines/ARQUITETURA.md)
 
 ### 2) Research
 Ambiente de pesquisa e exploração analítica em notebooks.
@@ -41,33 +54,121 @@ Pasta: [Research](Research)
 
 ```text
 Financial Research Data/
-├── Pipelines/   # ETL, jobs, docker, logs/checkpoints
-├── Research/    # notebooks e estudos analíticos
+├── Pipelines/
+│   ├── jobs/                          # jobs paramétricos
+│   ├── src/
+│   │   ├── pipelines/
+│   │   │   ├── b3_indices_segmentos_setoriais/   # pipeline B3
+│   │   │   │   ├── extract.py         # download via Selenium
+│   │   │   │   ├── transform.py       # limpeza e padronização
+│   │   │   │   ├── pipeline.py        # orquestração
+│   │   │   │   └── config.py
+│   │   │   ├── cvm_formulario_informacoes_trimestrais/  # pipeline CVM
+│   │   │   │   ├── extract.py         # download de ZIP
+│   │   │   │   ├── transform_1.py     # consolidação anual
+│   │   │   │   ├── transform_2.py     # filtragem por ticker
+│   │   │   │   ├── transform.py       # orquestração
+│   │   │   │   ├── pipeline.py        # execução end-to-end
+│   │   │   │   └── config.py
+│   │   │   └── pipeline_template/     # template para novos pipelines
+│   │   │       ├── extract.py
+│   │   │       ├── transform.py
+│   │   │       ├── pipeline.py
+│   │   │       └── config.py
+│   │   ├── shared/
+│   │   │   ├── context.py             # gerenciamento de paths e I/O
+│   │   │   ├── checkpoint_contract.py # estrutura de checkpoints
+│   │   │   └── checkpoint_values.py   # constants de status
+│   │   └── utils/                     # utilities compartilhadas
+│   ├── data/
+│   │   ├── b3_indices_segmentos_setoriais/
+│   │   │   ├── raw/                   # dados brutos
+│   │   │   └── processed/             # dados transformados
+│   │   └── cvm_formulario_informacoes_trimestrais/
+│   │       ├── raw/                   # arquivos ZIP
+│   │       ├── interim/               # CSVs consolidados
+│   │       └── processed/             # CSVs por ticker
+│   ├── state/
+│   │   └── checkpoints/               # progresso de execução (JSON)
+│   ├── logs/                          # logs por pipeline e run_id
+│   ├── Dockerfile
+│   ├── docker-compose.yml
+│   └── README.Docker.md
+├── Research/
+│   ├── Universos/                     # definições de universos de ativos
+│   ├── Ativos Individuais/            # análises específicas
+│   └── *.ipynb                        # notebooks de pesquisa
 ├── requirements.txt
-└── .gitignore
+└── README.md
 ```
 
 ## Como começar
 
-### Pipelines (Docker)
-1. Acesse a pasta `Pipelines`
-2. Faça build da imagem
-3. Execute com variáveis `PIPELINE_NAME` e `PIPELINE_ENV`
+### Pipelines (Local)
+```bash
+# Ativar ambiente
+.\.venv\Scripts\Activate.ps1
 
-Guia detalhado: [Pipelines/README.Docker.md](Pipelines/README.Docker.md)
+# Executar pipeline específica
+python -m Pipelines.jobs.b3_indices_segmentos_setoriais
+python -m Pipelines.jobs.cvm_formulario_informacoes_trimestrais
+```
+
+### Pipelines (Docker)
+```bash
+cd Pipelines
+docker-compose up --build -e PIPELINE_NAME=b3_indices_segmentos_setoriais
+```
+
+Detalhes completos: [Pipelines/README.Docker.md](Pipelines/README.Docker.md)
+
+### Checkpoints e Recovery
+Cada pipeline gera **checkpoints em JSON** em `Pipelines/state/checkpoints/{pipeline}/{stage}/{step}/{key}.json`.
+
+Isso permite:
+- **Recovery automático**: se falhar, continua do ponto de parada
+- **Auditoria**: rastreia status, timestamps e detalhes de cada etapa
+- **Modo desenvolvimento**: pula etapas já processadas com sucesso
+
+### Logs
+Logs estruturados por execução em `Pipelines/logs/{pipeline}/{run_id}/{pipeline}.{run_id}.log`
+
+**Opções de monitoramento:**
+- Ver logs locais durante/após execução
+- Verificar checkpoints JSON para status detalhado
+- Usar `desenvolviment_mode=True` para acelerar testes (reprocessa apenas falhas)
 
 ### Research
-- Abra os notebooks da pasta [Research](Research) no VS Code/Jupyter
-- Use o mesmo ambiente Python do projeto para consistência dos resultados
+Explore dados processados nos notebooks:
+- Abra notebooks da pasta [Research](Research) no VS Code/Jupyter
+- Use o mesmo ambiente Python para consistência
+- Universos: Brasil, Globais, Emergentes
+- Ativos Individuais: análises detalhadas
+
+Pasta: [Research](Research)
 
 ## Observações
 
 - Dados gerados em runtime (`Pipelines/data`, `Pipelines/logs`, `Pipelines/state`) são mantidos fora do versionamento por padrão.
-- A estrutura foi preparada para escalar novos pipelines com padrão de configuração e contrato de checkpoint compartilhado.
+- A estrutura foi preparada para escalar novos pipelines seguindo o **padrão**: `extract.py`, `transform.py`, `pipeline.py`, `config.py`
+- Checkpoints são essenciais para **recovery**: não deleting manualmente arquivos de checkpoint sem entender o impacto
+- Docstrings em classes facilitam manutenção e compreensão do fluxo
+
+## Troubleshooting
+
+**Pipeline falhou?**
+1. Checar log em `Pipelines/logs/{pipeline}/{run_id}`
+2. Revisar checkpoint JSON em `Pipelines/state/checkpoints/{pipeline}` para entender o ponto de falha
+3. Corrigir o erro e executar novamente (recovery automático)
+
+**Erro de path no Windows/Docker?**
+- Use `pathlib.Path` para composição agnóstica: `Path(dir_a) / dir_b`
+- Evite concatenação com strings ou barras fixas (`\`, `/`)
 
 ## Roadmap
 
-- Adicionar novos pipelines seguindo o template padrão (`extract`, `transform`, `pipeline`, `config`)
-- Expandir validações automáticas de contrato de checkpoint
-- Melhorar observabilidade com métricas por execução (tempo, volume, falhas)
-- Consolidar documentação operacional de execução local e Docker
+- [ ] Adicionar novos pipelines seguindo o template padrão
+- [ ] Expandir validações de contratos de checkpoint
+- [ ] Dashboard de execução (tempos, volume, falhas por pipeline)
+- [ ] Melhorar documentação de troubleshooting e observabilidade
+- [ ] Testes automatizados para validação de dados
